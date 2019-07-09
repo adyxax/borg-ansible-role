@@ -1,0 +1,89 @@
+---
+- name: generate borg ssh key on client
+  openssh_keypair:
+    owner: root
+    mode: 0400
+    path: /root/.ssh/borg
+    type: ed25519
+  register: borg_ssh_key
+
+- name: reload ansible_local
+  setup: filter=ansible_local
+  when: borg_ssh_key.changed
+
+- name: Enforce borg authorized key on server
+  authorized_key:
+    user: borg
+    key: "{{ ansible_local.borg.pubkey }}"
+    key_options: 'command="cd /srv/borg/repos/{{ ansible_hostname }}; borg serve --restrict-to-path /srv/borg/repos/{{ ansible_hostname }}",restrict'
+  delegate_to: "{{ borg_server }}"
+
+- name: create borg client repo directory on server
+  file:
+    path: "/srv/borg/repos/{{ ansible_hostname }}"
+    state: directory
+    owner: borg
+    mode: 0700
+  delegate_to: "{{ borg_server }}"
+
+- name: create borg client repo on server
+  command: "borg init --encryption=none /srv/borg/repos/{{ ansible_hostname }}"
+  become: yes
+  become_method: su
+  become_user: borg
+  delegate_to: "{{ borg_server }}"
+  args:
+    creates: "/srv/borg/repos/{{ ansible_hostname }}/config"
+
+- name: reload ansible_local
+  setup: filter=ansible_local
+  delegate_to: "{{ borg_server }}"
+  delegate_facts: True
+  when: hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] is not defined
+
+- name: make the server known to the client
+  lineinfile:
+    line: "{{ borg_server }} ecdsa-sha2-nistp256 {{ hostvars[borg_server]['ansible_ssh_host_key_ecdsa_public'] }}"
+    path: /root/.ssh/known_hosts
+    create: yes
+
+- name: make the repo directory on the client
+  file:
+    state: directory
+    path: "/root/.config/borg/security/{{ hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] }}"
+    owner: root
+    mode: 0700
+
+- name: make the repo known to the client
+  copy:
+    dest: "/root/.config/borg/security/{{ hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] }}/key-type"
+    content: "2"
+    owner: root
+    mode: 0600
+
+- name: deploy borg backup script
+  template:
+    dest: /usr/local/bin/adyxax_backup.sh
+    src: backup.sh.j2
+    owner: root
+    mode: 0500
+
+- name: activate borg cron on alpine
+  lineinfile:
+    line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
+    path: /etc/crontabs/root
+  when: ansible_os_family == 'Alpine'
+
+- name: activate borg cron on gentoo or redhat
+  file:
+    state: link
+    src: /usr/local/bin/adyxax_backup.sh
+    dest: /etc/cron.daily/backup
+  when: ansible_os_family == 'Gentoo' or ansible_os_family == 'RedHat'
+
+- name: activate borg cron on openbsd
+  lineinfile:
+    line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
+    path: /var/cron/tabs/root
+  when: ansible_os_family == 'OpenBSD'
+...

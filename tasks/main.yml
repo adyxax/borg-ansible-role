@@ -1,0 +1,10 @@
+---
+- import_tasks: common.yml
+  when: (is_borg_server|default(false)) or borg_server is defined
+
+- import_tasks: server.yml
+  when: (is_borg_server|default(false))
+
+- import_tasks: client.yml
+  when: borg_server is defined
+...

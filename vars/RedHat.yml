@@ -1,0 +1,4 @@
+---
+borg_packages:
+  - borgbackup
+...

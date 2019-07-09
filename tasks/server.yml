@@ -1,0 +1,26 @@
+---
+- name: Create borg group on server
+  group:
+    name: borg
+    system: yes
+
+- name: Create borg user on server
+  user:
+    name: borg
+    shell: /bin/sh
+    home: /srv/borg
+    createhome: yes
+    system: yes
+    password_lock: yes
+
+- name: Ensure borg directories exist on server
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: borg
+    mode: 0700
+  loop:
+    - /srv/borg
+    - /srv/borg/.ssh
+    - /srv/borg/repos
+...

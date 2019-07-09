@@ -1,0 +1,25 @@
+---
+- name: set distro-specific server variables
+  include_vars: '{{ ansible_os_family }}.yml'
+
+- name: Check if borg is supported on distro
+  fail:
+    msg: "borg tasks are not supported on this operating system yet."
+  when: borg_packages is not defined
+
+- name: Ensure borg is installed
+  package:
+    name: "{{ borg_packages }}"
+
+- name: Push borg gathering fact on client
+  copy:
+    src: borg.fact
+    dest: /etc/ansible/facts.d/
+    mode: 0500
+    owner: root
+  register: borg_gathering_fact
+
+- name: reload ansible_local
+  setup: filter=ansible_local
+  when: borg_gathering_fact.changed
+...

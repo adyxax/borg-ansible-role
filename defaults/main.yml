@@ -1,0 +1,3 @@
+---
+borg_prune_arguments: '--keep-within 30d'
+...
