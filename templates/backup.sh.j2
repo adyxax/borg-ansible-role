@@ -1,11 +1,19 @@
 #!/bin/sh
+###############################################################################
+#     \_o<     WARNING : This file is being managed by ansible!      >o_/     #
+#     ~~~~                                                           ~~~~     #
+###############################################################################
+
+HOME=/root
+PATH=${PATH}:/usr/local/bin
+BORG_RSH="ssh -i /root/.ssh/borg" 
 
 {% for job in borg_jobs %}
 {% if job.command_to_pipe is defined %}
 {{ job.command_to_pipe }} | BORG_RSH="ssh -i /root/.ssh/borg" borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path | default('-') }}
 {% else %}
-BORG_RSH="ssh -i /root/.ssh/borg" borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path }}
+borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path }}
 {% endif %}
 {% endfor %}
 
-BORG_RSH="ssh -i /root/.ssh/borg" borg prune borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }} {{ borg_prune_arguments }}
+borg prune borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }} {{ borg_prune_arguments }}

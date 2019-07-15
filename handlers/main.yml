@@ -1,0 +1,6 @@
+---
+- name: reload openbsd cron
+  service:
+    name: cron
+    state: reloaded
+...

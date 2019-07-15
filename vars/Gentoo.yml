@@ -1,4 +1,4 @@
 ---
 borg_packages:
-  - 'app-backup/borgbackup'
+  - app-backup/borgbackup
 ...
