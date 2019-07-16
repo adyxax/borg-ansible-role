@@ -1,6 +1,6 @@
 ---
-- name: reload openbsd cron
+- name: restart openbsd cron
   service:
     name: cron
-    state: reloaded
+    state: restarted
 ...

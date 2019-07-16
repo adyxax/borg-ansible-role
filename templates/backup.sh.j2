@@ -4,13 +4,13 @@
 #     ~~~~                                                           ~~~~     #
 ###############################################################################
 
-HOME=/root
-PATH=${PATH}:/usr/local/bin
-BORG_RSH="ssh -i /root/.ssh/borg" 
+export HOME=/root
+export PATH=${PATH}:/usr/local/bin
+export BORG_RSH="ssh -i /root/.ssh/borg" 
 
 {% for job in borg_jobs %}
 {% if job.command_to_pipe is defined %}
-{{ job.command_to_pipe }} | BORG_RSH="ssh -i /root/.ssh/borg" borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path | default('-') }}
+{{ job.command_to_pipe }} | borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path | default('-') }}
 {% else %}
 borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path }}
 {% endif %}

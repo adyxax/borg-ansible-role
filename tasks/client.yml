@@ -86,4 +86,5 @@
     line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
     path: /var/cron/tabs/root
   when: ansible_os_family == 'OpenBSD'
+  notify: restart openbsd cron
 ...
