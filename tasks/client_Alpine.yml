@@ -1,0 +1,6 @@
+---
+- name: activate borg cron
+  lineinfile:
+    line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
+    path: /etc/crontabs/root
+...

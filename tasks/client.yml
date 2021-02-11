@@ -27,10 +27,7 @@
   delegate_to: "{{ borg_server }}"
 
 - name: create borg client repo on server
-  command: "borg init --encryption=none /srv/borg/repos/{{ ansible_hostname }}"
-  become: yes
-  become_method: su
-  become_user: borg
+  shell: "echo \"borg init --encryption=none /srv/borg/repos/{{ ansible_hostname }}\" | su -l borg"
   delegate_to: "{{ borg_server }}"
   args:
     creates: "/srv/borg/repos/{{ ansible_hostname }}/config"
@@ -56,10 +53,15 @@
 
 - name: make the repo known to the client
   copy:
-    dest: "/root/.config/borg/security/{{ hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] }}/key-type"
-    content: "2"
+    dest: "/root/.config/borg/security/{{ hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] }}/{{ item.dest }}"
+    content: "{{ item.content }}"
     owner: root
     mode: 0600
+  loop:
+    - { dest: key-type, content: "2" }
+    - { dest: location, content: "ssh://borg@{{ borg_server }}/srv/borg/repos/{{ ansible_hostname }}" }
+    - { dest: manifest-timestamp, content: "{{ ansible_date_time['iso8601_micro'] }}" }
+  changed_when: false
 
 - name: deploy borg backup script
   template:
@@ -68,23 +70,6 @@
     owner: root
     mode: 0500
 
-- name: activate borg cron on alpine
-  lineinfile:
-    line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
-    path: /etc/crontabs/root
-  when: ansible_os_family == 'Alpine'
-
-- name: activate borg cron on gentoo or redhat
-  file:
-    state: link
-    src: /usr/local/bin/adyxax_backup.sh
-    dest: /etc/cron.daily/backup
-  when: ansible_os_family == 'Gentoo' or ansible_os_family == 'RedHat'
-
-- name: activate borg cron on openbsd
-  lineinfile:
-    line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
-    path: /var/cron/tabs/root
-  when: ansible_os_family == 'OpenBSD'
-  notify: restart openbsd cron
+- name: Run OS specific tasks
+  include_tasks: "roles/borg/tasks/client_{{ ansible_distribution }}.yml"
 ...

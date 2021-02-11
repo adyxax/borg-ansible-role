@@ -1,0 +1,7 @@
+---
+- name: activate borg cron
+  lineinfile:
+    line: '0 23 * * * /usr/local/bin/adyxax_backup.sh'
+    path: /var/cron/tabs/root
+  notify: restart openbsd cron
+...

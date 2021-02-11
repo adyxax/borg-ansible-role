@@ -9,10 +9,16 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export BORG_RSH="ssh -i /root/.ssh/borg" 
 
 {% for job in borg_jobs %}
+{% if job.pre_command is defined %}
+{{ job.pre_command }}
+{% endif %}
 {% if job.command_to_pipe is defined %}
 {{ job.command_to_pipe }} | borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path | default('-') }}
 {% else %}
 borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path }}
+{% endif %}
+{% if job.post_command is defined %}
+{{ job.post_command }}
 {% endif %}
 {% endfor %}
 

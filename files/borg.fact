@@ -4,19 +4,21 @@
 #     ~~~~                                                           ~~~~     #
 ###############################################################################
 
-echo '{'
+printf "{\n"
 if [ -e '/root/.ssh/borg.pub' ]; then
-    pubkey=`cat /root/.ssh/borg.pub | tr -d "\n"`
-    echo -ne '  "pubkey": "'$pubkey'"'
-    pubkey_prefix=",\n"
+	pubkey=`cat /root/.ssh/borg.pub | tr -d "\n"`
+	printf "  \"pubkey\": \"$pubkey\""
+	pubkey_prefix=",\n"
 fi
 if [ -e '/srv/borg/repos/' ]; then
-    echo -ne "${pubkey_prefix:-}"'  "repos": {'"\n"
-    for repo in `ls /srv/borg/repos/`; do
-        id=`awk '/^id =/ {print $3}' /srv/borg/repos/${repo}/config`
-        echo -ne ${repo_prefix:-}'    "'$repo'": "'$id'"'
-        repo_prefix=",\n"
-    done
-    echo -ne "\n  }"
+	printf "${pubkey_prefix:-}  \"repos\": {\n"
+	for repo in `ls /srv/borg/repos/`; do
+		if [ -e "/srv/borg/repos/${repo}/config" ]; then
+			id=`awk '/^id =/ {print $3}' /srv/borg/repos/${repo}/config`
+			printf "${repo_prefix:-}    \"$repo\": \"$id\""
+			repo_prefix=",\n"
+		fi
+	done
+	printf "\n  }"
 fi
-echo -ne "\n}"
+printf "\n}"

@@ -1,0 +1,7 @@
+---
+- name: activate borg cron
+  file:
+    state: link
+    src: /usr/local/bin/adyxax_backup.sh
+    dest: /etc/cron.daily/backup
+...
