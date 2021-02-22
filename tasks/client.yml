@@ -15,28 +15,8 @@
   authorized_key:
     user: borg
     key: "{{ ansible_local.borg.pubkey }}"
-    key_options: 'command="cd /srv/borg/repos/{{ ansible_hostname }}; borg serve --restrict-to-path /srv/borg/repos/{{ ansible_hostname }}",restrict'
+    key_options: 'command="borg serve --restrict-to-path /srv/borg/repos/{{ ansible_hostname }}",restrict'
   delegate_to: "{{ borg_server }}"
-
-- name: create borg client repo directory on server
-  file:
-    path: "/srv/borg/repos/{{ ansible_hostname }}"
-    state: directory
-    owner: borg
-    mode: 0700
-  delegate_to: "{{ borg_server }}"
-
-- name: create borg client repo on server
-  shell: "echo \"borg init --encryption=none /srv/borg/repos/{{ ansible_hostname }}\" | su -l borg"
-  delegate_to: "{{ borg_server }}"
-  args:
-    creates: "/srv/borg/repos/{{ ansible_hostname }}/config"
-
-- name: reload ansible_local
-  setup: filter=ansible_local
-  delegate_to: "{{ borg_server }}"
-  delegate_facts: True
-  when: hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] is not defined
 
 - name: make the server known to the client
   lineinfile:
@@ -44,24 +24,15 @@
     path: /root/.ssh/known_hosts
     create: yes
 
-- name: make the repo directory on the client
-  file:
-    state: directory
-    path: "/root/.config/borg/security/{{ hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] }}"
-    owner: root
-    mode: 0700
+- name: create borg client repo on server
+  shell: "borg init --rsh \"ssh -i /root/.ssh/borg\" --encryption=none borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}"
+  when: hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] is not defined
 
-- name: make the repo known to the client
-  copy:
-    dest: "/root/.config/borg/security/{{ hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] }}/{{ item.dest }}"
-    content: "{{ item.content }}"
-    owner: root
-    mode: 0600
-  loop:
-    - { dest: key-type, content: "2" }
-    - { dest: location, content: "ssh://borg@{{ borg_server }}/srv/borg/repos/{{ ansible_hostname }}" }
-    - { dest: manifest-timestamp, content: "{{ ansible_date_time['iso8601_micro'] }}" }
-  changed_when: false
+- name: reload ansible_local
+  setup: filter=ansible_local
+  delegate_to: "{{ borg_server }}"
+  delegate_facts: True
+  when: hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] is not defined
 
 - name: deploy borg backup script
   template:
