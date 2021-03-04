@@ -1,9 +1,11 @@
 ---
+- action: init
+
 - import_tasks: common.yml
-  when: adyxax['is_borg_server'] or borg_server is defined
+  when: is_borg_server or borg_server is defined
 
 - import_tasks: server.yml
-  when: adyxax['is_borg_server']
+  when: is_borg_server
 
 - import_tasks: client.yml
   when: borg_server is defined
