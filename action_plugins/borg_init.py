@@ -9,14 +9,16 @@ class ActionModule(ActionBase):
         result['changed'] = False
         result['failed'] = False
 
-        is_borg_server = False
+        is_server = False
 
         for hostname, hostvars in task_vars['hostvars'].items() :
             if 'borg_server' in hostvars.keys() and hostvars['borg_server'] == task_vars['ansible_host']:
-                is_borg_server = True
+                is_server = True
 
         result['ansible_facts'] = {
-            'is_borg_server': is_borg_server,
+            'borg': {
+                'is_server': is_server,
+            }
         }
 
         return result

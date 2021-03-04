@@ -15,7 +15,7 @@ Here are some job examples :
 - { name: mysqldump, command_to_pipe: "/usr/bin/mysqldump -h {{ mysql_server }} -u{{ ansible_hostname }} -p{{ ansible_local.mysql_client.password }} --single-transaction --add-drop-database -B {{ ansible_hostname }}" }
 - { name: gitea, path: "/tmp/gitea.zip", pre_command: "echo '/usr/local/sbin/gitea -C /etc/gitea -c /etc/gitea/app.ini dump -f /tmp/gitea.zip' | su -l _gitea", post_command: "rm -f /tmp/gitea.zip" }
 
-There is an action plugin that parses the borg_server entries from all hosts and set a flag to True in adyxax['is_borg_server'] for any machine specified as a backup target
+There is an action plugin that parses the borg_server entries from all host_vars and set the borg.is_server fact to True for any machine specified as a backup target
 
 Usefull commands:
 =================
