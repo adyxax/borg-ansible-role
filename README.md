@@ -69,9 +69,9 @@ On servers, the role creates a `borg` user with `/srv/borg` as a home directory 
 
 On clients, the role creates a borg ssh key for the root user and generates a backup script in `/usr/local/bin/adyxax_backup.sh`. The role also adds a cron job that will run the backup script each nigh. Lastly it makes sure the client's borg repository is properly initialised on the server.
 
-### Action plugin
+### Action plugins
 
-There is an action plugin that parses the borg_server entries from all host_vars and set a borg fact for both machines to be backed up and for machines that are specified as backup targets (so that they do not require any manual configuration or variables). This action plugin also enforces the job rules to make sure those are valid and without ambiguities.
+There is an action plugin that validates host_vars types and values for each borg role variable, and another that parses the borg_server entries from all host_vars and set a borg fact for both machines to be backed up and for machines that are specified as backup targets (so that they do not require any manual configuration or variables). This action plugin also enforces the job rules to make sure those are valid and without ambiguities.
 
 ### Ansible fact
 

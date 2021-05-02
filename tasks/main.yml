@@ -1,4 +1,6 @@
 ---
+- action: borg_validate
+
 - action: borg_init
 
 - import_tasks: common.yml
