@@ -2,7 +2,7 @@ This is the ansible role I use to orchestrate the backups on my personal infrast
 
 ## Introduction
 
-I wanted a role to easily manage my backups and did not find an existing one that satisfied me. A mandatory feature for me was the ability to configure a client in only one place without having to configure a server : the server configuration will be derived from the clients that need to use it as a backup target. Another mandatory feature is the validation of host_vars which virtually no role in the wild ever does.
+I wanted a role to easily manage my backups and did not find an existing one that satisfied me. A mandatory feature for me was the ability to configure a client in only one place without having to configure a server : the server configuration will be derived from the clients that need to use it as a backup target. Another mandatory feature is the validation of host_vars which virtually no role in the wild ever does... So I wrote [mine](https://git.adyxax.org/adyxax/borg-ansible-role).
 
 This way configuring backups for a host named `yen.adyxax.org` is as simple as having the following `host_vars` :
 ```yaml
@@ -11,8 +11,10 @@ julien@yen:~/git/adyxax/ansible$ cat host_vars/yen.adyxax.org
 borg_server: cobsd-jde.nexen.net
 borg_jobs:
   - { name: etc, path: "/etc", exclude: [ "/etc/firmware" ] }
-  - { name: gitea, path: "/tmp/gitea.zip", pre_command: "echo '/usr/local/sbin/gitea -C /etc/gitea -c /etc/gitea/app.ini dump -f /tmp/gitea.zip' | su -l _gitea", post_command: "
-rm -f /tmp/gitea.zip" }
+  - name: gitea
+    path: "/tmp/gitea.zip"
+    pre_command: "echo '/usr/local/sbin/gitea -C /etc/gitea -c /etc/gitea/app.ini dump -f /tmp/gitea.zip' | su -l _gitea"
+    post_command: "rm -f /tmp/gitea.zip"
   - { name: nethack, path: "/opt/nethack" }
   - { name: var_imap, path: "/var/imap" }
   - { name: var_spool_imap, path: "/var/spool/imap" }
@@ -40,24 +42,43 @@ julien@yen:~/git/adyxax/ansible$ cat setup.yml
 ## Configuration
 
 First of all you only need to configure hosts that are backup clients. There are several `host_vars` you can define to this effect :
-- `borg_server`: a string that contains a borg servers hostname
+- `borg_server`: a string that contains a borg servers hostname.
 - `borg_jobs`: a list of dict, one item per job with the following keys:
   - `name`: the name of the borg job, an alphanumeric string.
-  - `path`: an optional path containing the files to backup
-  - `command_to_pipe`: an optional command to pipe the backup data from
-  - `pre_command`: an optional command to run before a job
-  - `post_command`: an optional command to run after a job
-  - `exclude`: an optional list of paths containing locations to exclude
-- `borg_prune_arguments`: a string passed to the `borg prune` command, defaults to `'--keep-within 30d'` for a 30 days backups retention
+  - `path`: an optional path containing the files to backup.
+  - `command_to_pipe`: an optional command to pipe the backup data from.
+  - `pre_command`: an optional command to run before a job.
+  - `post_command`: an optional command to run after a job.
+  - `exclude`: an optional list of paths containing locations to exclude.
+- `borg_prune_arguments`: a string passed to the `borg prune` command, defaults to `'--keep-within 30d'` for a 30 days backups retention.
 
 To be valid a borg job entry needs to have a name and exactly one of `path` or `command_to_pipe` key.
 
 ## Jobs examples
 
 Here are some job examples :
-- `{ name: etc, path: "/etc", exclude: [ "/etc/firmware" ] }`
-- `{ name: mysqldump, command_to_pipe: "/usr/bin/mysqldump -h {{ mysql_server }} -u{{ ansible_hostname }} -p{{ ansible_local.mysql_client.password }} --single-transaction --add-drop-database -B {{ ansible_hostname }}" }`
-- `{ name: gitea, path: "/tmp/gitea.zip", pre_command: "echo '/usr/local/sbin/gitea -C /etc/gitea -c /etc/gitea/app.ini dump -f /tmp/gitea.zip' | su -l _gitea", post_command: "rm -f /tmp/gitea.zip" }`
+- backup a simple path, exclude a subdirectory :
+  ```yaml
+  - { name: etc, path: "/etc", exclude: [ "/etc/firmware" ] }
+  ```
+- backup from a command output, this is what I use in conjunction with another of my yet unreleased roles :
+  ```yaml
+  - name: mysqldump
+    command_to_pipe: >
+      /usr/bin/mysqldump -h {{ mysql_server }}
+                         -u {{ ansible_hostname }}
+                         -p {{ ansible_local.mysql_client.password }}
+                         --single-transaction
+                         --add-drop-database
+                         -B {{ ansible_hostname }}
+  ```
+- backup job with pre and post commands, what I use for my gitea server on OpenBSD :
+  ```yaml
+  - name: gitea
+    path: "/tmp/gitea.zip"
+    pre_command: "echo '/usr/local/sbin/gitea -C /etc/gitea -c /etc/gitea/app.ini dump -f /tmp/gitea.zip' | su -l _gitea"
+    post_command: "rm -f /tmp/gitea.zip"
+  ```
 
 ## What the role does
 
