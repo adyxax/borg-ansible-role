@@ -2,10 +2,10 @@
 - action: borg_init
 
 - import_tasks: common.yml
-  when: borg.is_server or borg_server is defined
+  when: borg.server.clients != [] or borg_server is defined
 
 - import_tasks: server.yml
-  when: borg.is_server
+  when: borg.server.clients != []
 
 - import_tasks: client.yml
   when: borg_server is defined
