@@ -2,10 +2,10 @@ This is the ansible role I use to orchestrate the backups on my personal infrast
 
 ## Introduction
 
-I wanted a role that you can use to easily manage my backups. A mandatory feature for me was the ability to configure a client in only one place without having to configure a server : the server configuration will be derived from the clients that need to use it as a backup target.
+I wanted a role to easily manage my backups and did not find an existing one that satisfied me. A mandatory feature for me was the ability to configure a client in only one place without having to configure a server : the server configuration will be derived from the clients that need to use it as a backup target. Another mandatory feature is the validation of host_vars which virtually no role in the wild ever does.
 
 This way configuring backups for a host named `yen.adyxax.org` is as simple as having the following `host_vars` :
-```
+```yaml
 julien@yen:~/git/adyxax/ansible$ cat host_vars/yen.adyxax.org
 ---
 borg_server: cobsd-jde.nexen.net
@@ -20,7 +20,7 @@ rm -f /tmp/gitea.zip" }
 ```
 
 Which can be used in a simple playbook like :
-```
+```yaml
 julien@yen:~/git/adyxax/ansible$ cat setup.yml
 ---
 - name: Gather facts
@@ -52,7 +52,7 @@ First of all you only need to configure hosts that are backup clients. There are
 
 To be valid a borg job entry needs to have a name and exactly one of `path` or `command_to_pipe` key.
 
-## Job examples
+## Jobs examples
 
 Here are some job examples :
 - `{ name: etc, path: "/etc", exclude: [ "/etc/firmware" ] }`
@@ -80,6 +80,6 @@ There is a fact script deployed on each server. It is used to retrieve the ssh p
 ## Usefull command:
 
 Manually schedule a backup run :
-```
+```sh
 ansible all -i hosts -m shell -a "/usr/local/bin/adyxax_backup.sh"
 ```
