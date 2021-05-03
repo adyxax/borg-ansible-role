@@ -42,7 +42,7 @@ julien@yen:~/git/adyxax/ansible$ cat setup.yml
 ## Configuration
 
 First of all you only need to configure hosts that are backup clients. There are several `host_vars` you can define to this effect :
-- `borg_server`: a string that contains a borg servers hostname.
+- `borg_server`: a string that contains a hostname.
 - `borg_jobs`: a list of dict, one item per job with the following keys:
   - `name`: the name of the borg job, an alphanumeric string.
   - `path`: an optional path containing the files to backup.
