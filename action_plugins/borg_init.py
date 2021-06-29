@@ -13,11 +13,12 @@ class ActionModule(ActionBase):
 
         ### OS support #######################################################
         os_package_names = {
-            'Alpine':  'borgbackup',
-            'Debian':  'borgbackup',
-            'Gentoo':  'app-backup/borgbackup',
-            'OpenBSD': 'borgbackup',
-            'RedHat':  'borgbackup',
+            'Alpine':   'borgbackup',
+            'Debian':   'borgbackup',
+            'FreeBSD':  'py38-borgbackup',
+            'Gentoo':   'app-backup/borgbackup',
+            'OpenBSD':  'borgbackup',
+            'RedHat':   'borgbackup',
         }
         if task_vars['ansible_os_family'] not in os_package_names:
             error_msgs.append(f"borg role does not support {task_vars['ansible_os_family']} os family clients yet")

@@ -1,5 +1,5 @@
 ---
-- name: restart openbsd cron
+- name: restart bsd cron
   service:
     name: cron
     state: restarted
