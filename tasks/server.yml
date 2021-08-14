@@ -12,7 +12,7 @@
     home: /srv/borg
     createhome: yes
     system: yes
-    password_lock: yes
+    password: '*'
 
 - name: Ensure borg directories exist on server
   file:
