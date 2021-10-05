@@ -39,8 +39,8 @@ class ActionModule(ActionBase):
                             error_msgs.append(f"Invalid job for host {task_vars['ansible_host']} : no name defined")
                         elif not isinstance(job['name'], str):
                             error_msgs.append(f"Invalid job name for host {task_vars['ansible_host']} : name must be of type string")
-                        elif not re.match(r'^[a-zA-Z0-9_]+$', job['name']):
-                            error_msgs.append(f"Invalid job name for host {task_vars['ansible_host']} : name must match ^[a-zA-Z0-9_]+$")
+                        elif not re.match(r'^[a-zA-Z0-9_-]+$', job['name']):
+                            error_msgs.append(f"Invalid job name for host {task_vars['ansible_host']} : name must match ^[a-zA-Z0-9_-]+$")
                         # path and command_to_pipe are mutually exclusive
                         if 'path' in job.keys() and 'command_to_pipe' in job.keys():
                             error_msgs.append(f"Invalid job for host {task_vars['ansible_host']} : it needs either a path or a command_to_pipe, not both")
