@@ -1,0 +1,3 @@
+{% for client in borg.server.clients %}
+command="borg serve --restrict-to-path /srv/borg/repos/{{ client.hostname }}",restrict {{ client.pubkey }}
+{% endfor %}

@@ -24,4 +24,11 @@
     - /srv/borg
     - /srv/borg/.ssh
     - /srv/borg/repos
+
+- name: deploy borg authorized_keys
+  template:
+    dest: /srv/borg/.ssh/authorized_keys
+    src: authorized_keys
+    owner: borg
+    mode: 0400
 ...

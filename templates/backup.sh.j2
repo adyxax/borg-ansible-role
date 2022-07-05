@@ -15,13 +15,13 @@ export BORG_RSH="ssh -i /root/.ssh/borg"
 {{ job.pre_command }}
 {% endif %}
 {% if job.command_to_pipe is defined %}
-{{ job.command_to_pipe }} | borg create borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} -
+{{ job.command_to_pipe }} | borg create borg@{{ borg_server }}:/srv/borg/repos/{{ inventory_hostname }}::{{ job.name }}-{now} -
 {% else %}
-borg create {% for exclude in job.exclude|default([]) %} --exclude {{ exclude }}{% endfor %} borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}::{{ job.name }}-{now} {{ job.path }}
+borg create {% for exclude in job.exclude|default([]) %} --exclude {{ exclude }}{% endfor %} borg@{{ borg_server }}:/srv/borg/repos/{{ inventory_hostname }}::{{ job.name }}-{now} {{ job.path }}
 {% endif %}
 {% if job.post_command is defined %}
 {{ job.post_command }}
 {% endif %}
 {% endfor %}
 
-borg prune borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }} {{ borg_prune_arguments }}
+borg prune borg@{{ borg_server }}:/srv/borg/repos/{{ inventory_hostname }} {{ borg_prune_arguments }}

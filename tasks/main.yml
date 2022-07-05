@@ -1,4 +1,7 @@
 ---
+- import_tasks: client_init.yml
+  when: borg_server is defined
+
 - action: borg_validate
 
 - action: borg_init

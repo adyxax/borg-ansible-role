@@ -1,23 +1,4 @@
 ---
-- name: generate borg ssh key on client
-  openssh_keypair:
-    owner: root
-    mode: 0400
-    path: /root/.ssh/borg
-    type: ed25519
-  register: borg_ssh_key
-
-- name: reload ansible_local
-  setup: filter=ansible_local
-  when: borg_ssh_key.changed
-
-- name: Enforce borg authorized key on server
-  authorized_key:
-    user: borg
-    key: "{{ ansible_local.borg.pubkey }}"
-    key_options: 'command="borg serve --restrict-to-path /srv/borg/repos/{{ ansible_hostname }}",restrict'
-  delegate_to: "{{ borg_server }}"
-
 - name: make the server known to the client
   lineinfile:
     line: "{{ borg_server }} ecdsa-sha2-nistp256 {{ hostvars[borg_server]['ansible_ssh_host_key_ecdsa_public'] }}"
@@ -25,14 +6,14 @@
     create: yes
 
 - name: create borg client repo on server
-  shell: "borg init --rsh \"ssh -i /root/.ssh/borg\" --encryption=none borg@{{ borg_server }}:/srv/borg/repos/{{ ansible_hostname }}"
-  when: hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] is not defined
+  shell: "borg init --rsh \"ssh -i /root/.ssh/borg\" --encryption=none borg@{{ borg_server }}:/srv/borg/repos/{{ inventory_hostname }}"
+  when: hostvars[borg_server]['ansible_local']['borg']['repos'][inventory_hostname] is not defined
 
 - name: reload ansible_local
   setup: filter=ansible_local
   delegate_to: "{{ borg_server }}"
   delegate_facts: True
-  when: hostvars[borg_server]['ansible_local']['borg']['repos'][ansible_hostname] is not defined
+  when: hostvars[borg_server]['ansible_local']['borg']['repos'][inventory_hostname] is not defined
 
 - name: deploy borg backup script
   template:

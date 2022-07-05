@@ -29,7 +29,7 @@ class ActionModule(ActionBase):
         }
         for hostname, hostvars in task_vars['hostvars'].items() :
             if 'borg_server' in hostvars.keys() and hostvars['borg_server'] == task_vars['ansible_host']:
-                server['clients'].append(hostname)
+                server['clients'].append({'hostname': hostname, 'pubkey': hostvars['ansible_local']['borg']['pubkey']})
 
         ### Borg client variables ############################################
         client = {
