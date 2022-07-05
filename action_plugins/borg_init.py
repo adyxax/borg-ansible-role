@@ -15,7 +15,7 @@ class ActionModule(ActionBase):
         os_package_names = {
             'Alpine':   'borgbackup',
             'Debian':   'borgbackup',
-            'FreeBSD':  'py38-borgbackup',
+            'FreeBSD':  'py39-borgbackup',
             'Gentoo':   'app-backup/borgbackup',
             'OpenBSD':  'borgbackup',
             'RedHat':   'borgbackup',
