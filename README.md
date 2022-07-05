@@ -41,7 +41,7 @@ julien@yen:~/git/adyxax/ansible$ cat setup.yml
 
 ## Upgrade notes from version 1.x to 2.x
 
-Version 2.x changes the repository path: `/srv/borg/repos/<hostname` becomes `/srv/borg/repos/<fqdn>`. You should move org rename the folders manually on your servers, the role will not do it for you. If you don't, running your usual playbook will create new borg repositories with the fqdn and leave the previous ones alone.
+Version 2.x changes the repository path: `/srv/borg/repos/<hostname` becomes `/srv/borg/repos/<fqdn>`. You should move or rename the folders manually on your servers, the role will not do it for you. Of course you won't lose any data if you do not, but your backups will consume that much more disk space since running your usual playbook will create new borg repositories with the fqdn and leave the previous ones alone.
 
 ## Configuration
 
